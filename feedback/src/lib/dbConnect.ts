@@ -1,5 +1,8 @@
 import { connect } from "http2";
 import mongoose from "mongoose"
+require('dotenv').config(); 
+import dotenv from 'dotenv';
+
 
 type ConnectionObject = {
     isConnected?: number
@@ -14,16 +17,21 @@ async function dbConnect(): Promise<void> {
         return;
     }
 
-    try {
-        const db = await mongoose.connect(process.env.MONGODB_URI || '', {})
+    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/Feedback';
 
-        connection.isConnected = db.connections[0].readyState
-
-        console.log("DB connected Successfully")
-        
+    if (!uri) {
+        throw new Error('MongoDB URI is not defined');
     }
-    catch(error) {
 
+    try {
+        const db = await mongoose.connect(uri)
+
+        connection.isConnected = db.connections[0].readyState;
+        console.log("DB connected successfully");
+        
+    } catch (error) {
+        console.error("DB connection error:", error);
+        process.exit(1);
     }
 }
 
