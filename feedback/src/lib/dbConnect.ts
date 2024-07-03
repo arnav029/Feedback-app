@@ -1,38 +1,31 @@
-import { connect } from "http2";
-import mongoose from "mongoose"
-require('dotenv').config(); 
-import dotenv from 'dotenv';
-
+import mongoose from 'mongoose';
 
 type ConnectionObject = {
-    isConnected?: number
-}
+  isConnected?: number;
+};
 
-
-const connection: ConnectionObject = {}
+const connection: ConnectionObject = {};
 
 async function dbConnect(): Promise<void> {
-    if(connection.isConnected) {
-        console.log("Already connected to the database");
-        return;
-    }
+  // Check if we have a connection to the database or if it's currently connecting
+  if (connection.isConnected) {
+    console.log('Already connected to the database');
+    return;
+  }
 
-    const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/Feedback';
+  try {
+    // Attempt to connect to the database
+    const db = await mongoose.connect(process.env.MONGODB_URI || '', {});
 
-    if (!uri) {
-        throw new Error('MongoDB URI is not defined');
-    }
+    connection.isConnected = db.connections[0].readyState;
 
-    try {
-        const db = await mongoose.connect(uri)
+    console.log('Database connected successfully');
+  } catch (error) {
+    console.error('Database connection failed:', error);
 
-        connection.isConnected = db.connections[0].readyState;
-        console.log("DB connected successfully");
-        
-    } catch (error) {
-        console.error("DB connection error:", error);
-        process.exit(1);
-    }
+    // Graceful exit in case of a connection error
+    process.exit(1);
+  }
 }
 
-export default dbConnect
+export default dbConnect;
