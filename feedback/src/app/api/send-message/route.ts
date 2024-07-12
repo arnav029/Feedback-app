@@ -16,7 +16,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if the user is accepting messages
     if (!user.isAcceptingMessages) {
       return Response.json(
         { message: 'User is not accepting messages', success: false },
@@ -26,7 +25,6 @@ export async function POST(request: Request) {
 
     const newMessage = { content, createdAt: new Date() };
 
-    // Push the new message to the user's messages array
     user.messages.push(newMessage as Message);
     await user.save();
 
